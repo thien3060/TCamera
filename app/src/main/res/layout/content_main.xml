@@ -10,23 +10,37 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.user.tcamera.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_main"
+    android:background="@drawable/android">
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/camera_text"
         android:id="@+id/btn_camera"
-        android:layout_alignParentTop="true"
+        android:background="@drawable/btn1"
+        android:layout_below="@+id/AppTitle"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="95dp" />
+        android:layout_marginTop="88dp" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/gallery_text"
         android:id="@+id/btn_gallery"
+        android:background="@drawable/btn2"
         android:layout_below="@+id/btn_camera"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="39dp" />
+        android:layout_marginTop="77dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/tcamera"
+        android:id="@+id/AppTitle"
+        android:textSize="30dp"
+        android:textIsSelectable="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="17dp" />
 </RelativeLayout>
