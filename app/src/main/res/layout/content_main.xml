@@ -19,8 +19,7 @@
         android:id="@+id/btn_camera"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="95dp"
-        android:onClick="btn_camera_click" />
+        android:layout_marginTop="95dp" />
 
     <Button
         android:layout_width="wrap_content"
@@ -29,6 +28,5 @@
         android:id="@+id/btn_gallery"
         android:layout_below="@+id/btn_camera"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="39dp"
-        android:onClick="btn_gallery_click" />
+        android:layout_marginTop="39dp" />
 </RelativeLayout>

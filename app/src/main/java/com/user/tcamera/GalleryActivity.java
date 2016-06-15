@@ -1,121 +1,59 @@
 package com.user.tcamera;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
-
-import com.user.tcamera.gallery.GalleryAdapter;
-import com.user.tcamera.gallery.ImageModel;
-import com.user.tcamera.gallery.RecyclerItemClickListener;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 public class GalleryActivity extends AppCompatActivity {
-    GalleryAdapter mAdapter;
-    RecyclerView mRecyclerView;
+    private static final int SELECT_PICTURE = 1;
 
-    ArrayList<ImageModel> data = new ArrayList<>();
-    private String[] IMGS;
+    private String selectedImagePath;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_gallery);
-
-        IMGS = ReadImages().toArray(new String[0]);
-
-        for (int i = 0; i < IMGS.length; i++) {
-
-            ImageModel imageModel = new ImageModel();
-            imageModel.setName("Image " + i);
-            imageModel.setUrl(IMGS[i]);
-            data.add(imageModel);
-
-        }
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        mRecyclerView = (RecyclerView) findViewById(R.id.list);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        mRecyclerView.setHasFixedSize(true);
-
-
-        mAdapter = new GalleryAdapter(GalleryActivity.this, data);
-        mRecyclerView.setAdapter(mAdapter);
-
-        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this,
-                new RecyclerItemClickListener.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(View view, int position) {
-
-                        Intent intent = new Intent(GalleryActivity.this, ImageEditorActivity.class);
-                        intent.putExtra("imageUri", data.get(position).getUrl());
-                        startActivity(intent);
-                    }
-                }));
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent,
+                "Select Picture"), SELECT_PICTURE);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_PICTURE) {
+                Uri selectedImageUri = data.getData();
+                selectedImagePath = selectedImageUri.getPath();
 
-    private List<String> ReadImages() {
-        List<String> s = new ArrayList<String>();
-        String ExternalStorageDirectoryPath = Environment
-                .getExternalStorageDirectory()
-                .getAbsolutePath();
-
-        String targetPath = ExternalStorageDirectoryPath ;
-
-        File targetDirector = new File(targetPath);
-        List<File> allFile = getListFiles(targetDirector);
-        allFile.addAll(getListFiles(getFilesDir()));
-        File[] files = allFile.toArray(new File[0]);
-
-        Arrays.sort( files, new Comparator()
-        {
-            public int compare(Object o1, Object o2) {
-                if (((File)o1).lastModified() > ((File)o2).lastModified()) {
-                    return -1;
-                } else if (((File)o1).lastModified() < ((File)o2).lastModified()) {
-                    return +1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-
-        for (File file : files){
-            s.add(file.getAbsolutePath());
-        }
-
-        return  s;
-    }
-
-    private List<File> getListFiles(File parentDir) {
-        ArrayList<File> inFiles = new ArrayList<File>();
-        File[] files = parentDir.listFiles();
-        for (File file : files) {
-            if (file.isDirectory()) {
-                inFiles.addAll(getListFiles(file));
-            } else {
-                if(file.getName().endsWith(".jpg")){
-                    inFiles.add(file);
-                }
+                Intent editImageIntent = new Intent(this, ImageEditorActivity.class);
+                editImageIntent.putExtra("imageUri", selectedImageUri.toString());
+                startActivity(editImageIntent);
             }
         }
-        return inFiles;
+    }
+
+    /**
+     * helper to retrieve the path of an image URI
+     */
+    public String getPath(Uri uri) {
+        // just some safety built in
+        if( uri == null ) {
+            // TODO perform some logging or show user feedback
+            return null;
+        }
+        // try to retrieve the image from the media store first
+        // this will only work for images selected from gallery
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        if( cursor != null ){
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        }
+        // this is our fallback here
+        return uri.getPath();
     }
 }
